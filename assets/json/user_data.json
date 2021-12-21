@@ -1,0 +1,18 @@
+{
+  "user_data" : {
+    "first_name" : "asd",
+    "last_name" : "asd",
+    "mail" : "asd@asd.asd",
+    "phone" : "asd",
+
+    "salt" : "619833adab6e9619833adab6ea",
+    "app_token" : "cf5e50dfbb5af0fe00178d88f6a86c"
+  },
+
+  "visible" : [
+    "first_name",
+    "last_name",
+    "mail",
+    "phone"
+  ]
+}
