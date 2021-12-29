@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:ui';
-import 'package:http/http.dart' as http;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -27,9 +25,9 @@ class _HotelDetailesState extends State<HotelDetailes>
     with TickerProviderStateMixin {
   ScrollController scrollController = ScrollController(initialScrollOffset: 0);
   var hoteltext1 =
-      "Test text 1...";
+      "We invite you to enjoy our hotel «VIVA». Set in the heart of Kharkov, the hotel «VIVA» is ideal for business or pleasure. We are located at 10/2 Gagarina Avenue (only 15 minutes to the airport and 5 minutes to the main railroad station).";
   var hoteltext2 =
-      "Test text 1234567890 .";
+      "The Hotel «Viva» offers delicate European and traditional cuisine. Start the day off right with a complimentary hot breakfast buffet and fragrant coffee, while browsing through the daily newspaper, fresh off the press. Relax in our pleasant atmosphere while either meeting with your colleagues or just simple having a dinner.";
   bool isReadless = false;
   late AnimationController animationController;
   var imageHieght = 0.0;
@@ -122,7 +120,7 @@ class _HotelDetailesState extends State<HotelDetailes>
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: !isReadless ? hoteltext1 : hoteltext2,
+                            text: !isReadless ? hoteltext1.substring(0, 21) : hoteltext1,
                             style: TextStyles(context)
                                 .getDescriptionStyle()
                                 .copyWith(
@@ -194,9 +192,83 @@ class _HotelDetailesState extends State<HotelDetailes>
                     child: CommonButton(
                       buttonText: AppLocalizations(context).of("book_now"),
                       onTap: () {
-                        NavigationServices(context)
-                            .gotoRoomBookingScreen(widget.hotel.titleTxt);
+                        NavigationServices(context).gotoRoomBookingScreen();
                       },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 24, right: 24),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            "Hotel VIVA: Cafe-Bar", // L
+                            style: TextStyles(context).getBoldStyle().copyWith(
+                              fontSize: 14,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                    EdgeInsets.only(left: 24, right: 24, top: 4, bottom: 8),
+                    child: RichText(
+                      textAlign: TextAlign.justify,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: !isReadless ? hoteltext2.substring(0, 32) : hoteltext2,
+                            style: TextStyles(context)
+                                .getDescriptionStyle()
+                                .copyWith(
+                              fontSize: 14,
+                            ),
+                            recognizer: new TapGestureRecognizer()..onTap = () {},
+                          ),
+                          TextSpan(
+                            text: !isReadless
+                                ? AppLocalizations(context).of("read_more")
+                                : AppLocalizations(context).of("less"),
+                            style: TextStyles(context).getRegularStyle().copyWith(
+                                color: AppTheme.primaryColor, fontSize: 14),
+                            recognizer: new TapGestureRecognizer()
+                              ..onTap = () {
+                                setState(() {
+                                  isReadless = !isReadless;
+                                });
+                              },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      AspectRatio(
+                        aspectRatio: 1.5,
+                        child: Image.asset(
+                          Localfiles.barImage,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                      top: 16
+                    ),
+                    child: CommonButton(
+                      buttonText: "Cafe-Bar", //L
+                      onTap: () {
+                        NavigationServices(context).gotoDishesScreen();
+                      }
                     ),
                   ),
 
@@ -205,7 +277,12 @@ class _HotelDetailesState extends State<HotelDetailes>
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 24),
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                      top: 16
+                    ),
                     child: Row(
                       children: <Widget>[
                         Expanded(
@@ -239,7 +316,6 @@ class _HotelDetailesState extends State<HotelDetailes>
               ),
             ),
 
-            // backgrouund image and Hotel name and thier details and more details animation view
             _backgroundImageUI(widget.hotel),
 
             Padding(
@@ -248,7 +324,6 @@ class _HotelDetailesState extends State<HotelDetailes>
                 height: AppBar().preferredSize.height,
                 child: Row(
                   children: <Widget>[
-
                     Expanded(
                       child: SizedBox(),
                     ),
@@ -272,72 +347,69 @@ class _HotelDetailesState extends State<HotelDetailes>
   }
 
   Widget _getContactButtons(Color color, Color iconcolor) {
-    return Padding(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      child: Container(
-        height: AppBar().preferredSize.height,
-        child: Row(
-          children: <Widget>[
-            _getButton(
-                color,
-                FontAwesomeIcons.facebook,
-                iconcolor,
-                () {
-                  Requests.social(ApiUrls.facebook);
-                }
+    return Container(
+      height: AppBar().preferredSize.height,
+      child: Row(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 2, right: 2),
+            child: _getButton(
+              color,
+              FontAwesomeIcons.facebook,
+              iconcolor,
+              () {
+                Requests.open(ApiUrls.facebook);
+              }
             ),
-            _getButton(
-                color,
-                FontAwesomeIcons.viber,
-                iconcolor,
-                () {
-                  Requests.social(ApiUrls.viber);
-                }
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 2, right: 2),
+            child: _getButton(
+              color,
+              FontAwesomeIcons.viber,
+              iconcolor,
+              () {
+                Requests.open(ApiUrls.viber);
+              }
             ),
-            _getButton(
-                color,
-                FontAwesomeIcons.telegram,
-                iconcolor,
-                () {
-                  Requests.social(ApiUrls.telegram);
-                }
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 2, right: 2),
+            child: _getButton(
+              color,
+              FontAwesomeIcons.telegram,
+              iconcolor,
+              () {
+                Requests.open(ApiUrls.telegram);
+              }
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24),
-              child: RichText(
-                text:TextSpan(
-                  text: ApiUrls.contact_phone,
-                  recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    Requests.phone();
-                  },
-                  style: TextStyle(
-                    color: Colors.blue,
-                  )
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 2, right: 2),
+            child: RichText(
+              text: TextSpan(
+                text:
+                  ApiUrls.contact_phone.substring(0, 3) +
+                  "(" +
+                  ApiUrls.contact_phone.substring(3, 6) +
+                  ")" +
+                  ApiUrls.contact_phone.substring(6, 9) +
+                  "-" +
+                  ApiUrls.contact_phone.substring(9, 11) +
+                  "-" +
+                  ApiUrls.contact_phone.substring(11),
+                recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Requests.phone();
+                },
+                style: TextStyles(context).getBoldStyle().copyWith(
+                  fontSize: 14,
+                  letterSpacing: 0.5,
                 ),
               ),
-
-              // InkWell(
-              //   borderRadius: BorderRadius.all(
-              //     Radius.circular(32.0),
-              //   ),
-              //   onTap: () {
-              //     _send(ApiUrls.phone);
-              //   },
-              //   child: Padding(
-              //     padding: const EdgeInsets.all(15.0),
-              //     child: Text(
-              //       ApiUrls.contact_phone,
-              //       style: TextStyles(context).getBoldStyle().copyWith(
-              //         fontSize: 14,
-              //         letterSpacing: 0.5,
-              //       ),
-              //     ),
-              //   ),
-              // ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -345,23 +417,20 @@ class _HotelDetailesState extends State<HotelDetailes>
   Widget _getButton(Color color, IconData icon, Color iconcolor, VoidCallback onTap) {
     return SizedBox(
       height: AppBar().preferredSize.height,
-      child: Padding(
-        padding: EdgeInsets.only(top: 8, left: 8, right: 8),
-        child: Container(
-          width: AppBar().preferredSize.height - 8,
-          height: AppBar().preferredSize.height - 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(32.0),
-              ),
-              onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(icon, color: iconcolor),
-              ),
+      child: Container(
+        width: AppBar().preferredSize.height - 8,
+        height: AppBar().preferredSize.height - 8,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.all(
+              Radius.circular(32.0),
+            ),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(icon, color: iconcolor),
             ),
           ),
         ),
@@ -450,18 +519,17 @@ class _HotelDetailesState extends State<HotelDetailes>
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.only(
-                                          left: 16,
-                                          right: 16,
-                                          bottom: 16,
-                                          top: 16),
+                                        left: 16,
+                                        right: 16,
+                                        bottom: 16,
+                                        top: 16
+                                      ),
                                       child: CommonButton(
-                                          buttonText: AppLocalizations(context)
-                                              .of("book_now"),
-                                          onTap: () {
-                                            NavigationServices(context)
-                                                .gotoRoomBookingScreen(
-                                                    widget.hotel.titleTxt);
-                                          }),
+                                        buttonText: AppLocalizations(context).of("book_now"),
+                                        onTap: () {
+                                          NavigationServices(context).gotoRoomBookingScreen();
+                                        }
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -510,7 +578,7 @@ class _HotelDetailesState extends State<HotelDetailes>
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Text(
-              "\$${widget.hotel.perNight}",
+              "€${widget.hotel.perNight}",
               textAlign: TextAlign.left,
               style: TextStyles(context).getBoldStyle().copyWith(
                 fontSize: 22,

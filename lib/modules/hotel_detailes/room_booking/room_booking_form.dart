@@ -2,21 +2,31 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:new_motel/common/common.dart';
 import 'package:new_motel/constants/themes.dart';
 import 'package:new_motel/models/data.dart';
-import 'package:new_motel/modules/hotel_detailes/room_booking/time_date_view.dart';
+import 'package:new_motel/models/requests.dart';
+import 'package:new_motel/routes/route_names.dart';
 import 'package:new_motel/widgets/common_button.dart';
 import 'package:new_motel/widgets/common_card.dart';
 import 'package:new_motel/widgets/remove_focuse.dart';
+import 'package:new_motel/modules/hotel_detailes/room_book_view.dart' show Type;
+import 'calendar_pop_up_view.dart';
 
 class RoomBookingForm extends StatefulWidget {
-  final Item roomData;
+  late Map data;
+  late var type;
+  late DateTime startDate;
+  late DateTime endDate;
+  late DateTime initStartDate;
 
-  const RoomBookingForm({
-    Key? key,
-    required this.roomData
-  })
-  : super(key: key);
+  RoomBookingForm(data, type) {
+    this.type = type;
+    this.data = data;
+    this.startDate = (type == Type.prolong) ? DateTime.parse(data["prolong"]) : DateTime.now();
+    this.endDate   = this.startDate.add(Duration(days: 5));
+    this.initStartDate = this.startDate;
+  }
 
   @override
   _RoomBookingFormState createState() => _RoomBookingFormState();
@@ -65,139 +75,176 @@ class _RoomBookingFormState extends State<RoomBookingForm> with TickerProviderSt
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        TimeDateView(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Expanded(
-                              child: Row(
-                                children: <Widget>[
-                                  Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                                      onTap: () {
-                                        setState(() {
-                                          ch1 = !ch1;
-                                        });
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 8, top: 8, bottom: 8, right: 8),
-                                        child: Row(
-                                          children: <Widget>[
-                                            Icon(
-                                              ch1
-                                                  ? Icons.check_box
-                                                  : Icons.check_box_outline_blank,
-                                              color: ch1
-                                                  ? Theme.of(context).primaryColor
-                                                  : Colors.grey.withOpacity(0.6)
-                                            ),
-                                            SizedBox(
-                                              width: 4,
-                                            ),
-                                            FittedBox(
-                                              fit: BoxFit.cover,
-                                              child: Text(
-                                                "Early check-in"
+                        // TimeDateView(),
+                        if (widget.type != Type.business)
+                          CalendarPopupView(
+                            barrierDismissible: true,
+                            isStaticStartDate: widget.type == Type.prolong,
+                            minimumDate: widget.initStartDate,
+                            maximumDate: widget.initStartDate.add(Duration(days: 30)),
+                            initialEndDate: widget.endDate,
+                            initialStartDate: widget.startDate,
+                            onChangeClick: (DateTime startData,
+                            DateTime endData) {
+                              setState(() {
+                                widget.startDate = startData;
+                                widget.endDate = endData;
+                              });
+                            },
+                          ),
+
+                        if (widget.type == Type.book)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Center(
+                                child: Row(
+                                  children: <Widget>[
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                                        onTap: () {
+                                          setState(() {
+                                            ch1 = !ch1;
+                                          });
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets
+                                              .only(
+                                              left: 8,
+                                              top: 8,
+                                              bottom: 8,
+                                              right: 8),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Icon(
+                                                ch1 ?
+                                                  Icons.check_box :
+                                                  Icons.check_box_outline_blank,
+                                                color: ch1 ?
+                                                  Theme.of(context).primaryColor :
+                                                  Colors.grey.withOpacity(0.6)
+                                              ),
+                                              SizedBox(
+                                                width: 4,
+                                              ),
+                                              FittedBox(
+                                                fit: BoxFit.cover,
+                                                child: Text("Early check-in")
                                               )
-                                            )
-                                          ]
+                                            ]
+                                          )
                                         )
                                       )
                                     )
-                                  )
-                                ]
-                              )
-                            ),
-                            Expanded(
-                              child: Row(
-                                children: <Widget>[
-                                  Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                                      onTap: () {
-                                        setState(() {
-                                          ch2 = !ch2;
-                                        });
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 8, top: 8, bottom: 8, right: 8),
-                                        child: Row(
-                                          children: <Widget>[
-                                            Icon(
-                                              ch2
-                                                  ? Icons.check_box
-                                                  : Icons.check_box_outline_blank,
-                                              color: ch2
-                                                  ? Theme.of(context).primaryColor
-                                                  : Colors.grey.withOpacity(0.6)
-                                            ),
-                                            SizedBox(
-                                              width: 4,
-                                            ),
-                                            FittedBox(
-                                              fit: BoxFit.cover,
-                                              child: Text(
-                                                "Late check-out"
+                                  ]
+                                )
+                              ),
+                              Container(
+                                height: 1,
+                                width: 10,
+                                color: Colors.transparent,
+                              ),
+                              Center(
+                                child: Row(
+                                  children: <Widget>[
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius
+                                            .all(
+                                            Radius.circular(4.0)),
+                                        onTap: () {
+                                          setState(() {
+                                            ch2 = !ch2;
+                                          });
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets
+                                              .only(
+                                              left: 8,
+                                              top: 8,
+                                              bottom: 8,
+                                              right: 8),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Icon(
+                                                ch2 ?
+                                                  Icons.check_box :
+                                                  Icons.check_box_outline_blank,
+                                                color: ch2 ?
+                                                  Theme.of(context).primaryColor :
+                                                  Colors.grey.withOpacity(0.6)
+                                              ),
+                                              SizedBox(
+                                                width: 4,
+                                              ),
+                                              FittedBox(
+                                                fit: BoxFit.cover,
+                                                child: Text("Late check-out")
                                               )
-                                            )
-                                          ]
+                                            ]
+                                          )
                                         )
                                       )
                                     )
-                                  )
-                                ]
+                                  ]
+                                )
                               )
-                            ),
-                          ]
-                        ),
+                            ]
+                          ),
                         Padding(
                           padding: const EdgeInsets.only(
-                            left: 16, right: 16, bottom: 16, top: 8
+                              left: 16, right: 16, bottom: 16, top: 8
                           ),
                           child: CommonButton(
                             buttonText: "Confirm",
                             onTap: () async {
+                              Map room = {
+                                "title": widget.data["title"],
+                                "type": widget.data["id"].substring(
+                                    widget.data["id"].indexOf("|") + 1),
+                                "quant": widget.endDate
+                                    .difference(widget.startDate)
+                                    .inDays
+                              };
 
-
-                              int sum = widget.roomData.sum;
-                              List<Item> list = [widget.roomData];
+                              List<Map> list = [room];
 
                               if (ch1 || ch2) {
                                 HotelData hotelData = HotelData();
                                 await hotelData.readJson();
                                 var hData = jsonDecode(hotelData.json);
 
-                                Item early = Item.empty();
-                                Item late = Item.empty();
+                                Map early = {};
+                                Map late = {};
 
                                 for (var i in hData["services_list"]) {
                                   if (i["id"] == "OrderRano")
-                                    early = Item.fromJson(i);
+                                    early = {
+                                      "title" : i["title"],
+                                      "type"  : "OrderRano",
+                                      "quant" : 1
+                                    };
                                   if (i["id"] == "OrderPosdno")
-                                    late = Item.fromJson(i);
+                                    late = {
+                                      "title" : i["title"],
+                                      "type"  : "OrderPosdno",
+                                      "quant" : 1
+                                    };
                                 }
 
-                                if (ch1) {
-                                  sum += early.sum;
+                                if (ch1)
                                   list.add(early);
-                                }
-                                if (ch2) {
-                                  sum += late.sum;
+                                if (ch2)
                                   list.add(late);
-                                }
                               }
-                              String order = Item.listToJsonString(list);
 
-                              print(order);
-                              print(sum);
-
+                              await _send(list);
 
                               Navigator.pop(context);
+                              NavigationServices(context).gotoHotelDetailes();
                             },
                           ),
                         )
@@ -212,278 +259,150 @@ class _RoomBookingFormState extends State<RoomBookingForm> with TickerProviderSt
       ),
     );
   }
-}
-/*
-  Widget allAccommodationUI() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding:
-          const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
-          child: Text(
-            AppLocalizations(context).of("type of accommodation"),
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Colors.grey,
-                fontSize: MediaQuery
-                    .of(context)
-                    .size
-                    .width > 360 ? 18 : 16,
-                fontWeight: FontWeight.normal),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 16, left: 16),
-          child: Column(
-            children: getAccomodationListUI(),
-          ),
-        ),
-        SizedBox(
-          height: 8,
-        ),
-      ],
+
+  _send(List<Map> order) async {
+    UserData userData = UserData();
+    await userData.readJson();
+    var uData = jsonDecode(userData.json);
+
+    String? r = await Requests.service(
+        uData["user_data"]["app_token"],
+        uData["user_data"]["salt"],
+        uData["user_data"]["mail"],
+        order,
+        widget.startDate
     );
+    if (r == null)
+      return;
+    var data = jsonDecode(r)["data"];
+
+    HotelData hotelData = HotelData();
+    await hotelData.readJson();
+    var hData = jsonDecode(hotelData.json);
+
+    hData["current_order"]["id"] = data["orderid"];
+    hData["current_order"]["status"] = "verification";
+
+    hotelData.json = jsonEncode(hData);
+    hotelData.saveJson();
+
+    Requests.open(data["payurl"]);
+
+    Function _startVeryfying = () async {
+      HotelData hotelData = HotelData();
+      await hotelData.readJson();
+      var hData = jsonDecode(hotelData.json);
+
+      hData["current_order"]["id"] = data["orderid"];
+      hData["current_order"]["status"] = "verification";
+
+      hotelData.json = jsonEncode(hData);
+      hotelData.saveJson();
+
+      for (int i = 0; i < 30; i++) { // 5 minutes, 10 sec
+        await Future.delayed(const Duration(milliseconds: 10000));
+        var re = await Requests.verify(
+            uData["user_data"]["app_token"],
+            uData["user_data"]["salt"],
+            uData["user_data"]["mail"],
+            data["orderid"]
+        );
+        if (re != null) {
+          showVerify(true);
+
+          hData["current_order"]["status"] = "success";
+          hotelData.json = jsonEncode(hData);
+          hotelData.saveJson();
+
+          _getServices();
+
+          return;
+        }
+      }
+      showVerify(false);
+
+      hData["current_order"]["status"] = "fail";
+      hotelData.json = jsonEncode(hData);
+      hotelData.saveJson();
+    };
+
+    _startVeryfying();
   }
 }
-
-  List<Widget> getAccomodationListUI() {
-    List<Widget> noList = [];
-    for (var i = 0; i < accomodationListData.length; i++) {
-      final date = accomodationListData[i];
-      noList.add(
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            onTap: () {
-              setState(() {
-                checkAppPosition(i);
-              });
-            },
+showVerify(bool isSuccess) async {
+  showDialog(
+      context: navigatorKey.currentContext!,
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.transparent,
+        body: RemoveFocuse(
+          onClick: () {
+            Navigator.pop(context);
+          },
+          child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      AppLocalizations(context).of(date.titleTxt),
-                      // style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  CupertinoSwitch(
-                    activeColor: date.isSelected
-                        ? Theme.of(context).primaryColor
-                        : Colors.grey.withOpacity(0.6),
-                    onChanged: (value) {
-                      setState(() {
-                        checkAppPosition(i);
-                      });
-                    },
-                    value: date.isSelected,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-      if (i == 0) {
-        noList.add(Divider(
-          height: 1,
-        ));
-      }
-    }
-    return noList;
-  }
-
-  void checkAppPosition(int index) {
-    if (index == 0) {
-      if (accomodationListData[0].isSelected) {
-        accomodationListData.forEach((d) {
-          d.isSelected = false;
-        });
-      } else {
-        accomodationListData.forEach((d) {
-          d.isSelected = true;
-        });
-      }
-    } else {
-      accomodationListData[index].isSelected =
-      !accomodationListData[index].isSelected;
-
-      var count = 0;
-      for (var i = 0; i < accomodationListData.length; i++) {
-        if (i != 0) {
-          var data = accomodationListData[i];
-          if (data.isSelected) {
-            count += 1;
-          }
-        }
-      }
-
-      if (count == accomodationListData.length - 1) {
-        accomodationListData[0].isSelected = true;
-      } else {
-        accomodationListData[0].isSelected = false;
-      }
-    }
-  }
-
-  Widget distanceViewUI() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding:
-          const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
-          child: Text(
-            AppLocalizations(context).of("distance from city"),
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Colors.grey,
-                fontSize: MediaQuery.of(context).size.width > 360 ? 18 : 16,
-                fontWeight: FontWeight.normal),
-          ),
-        ),
-        SliderView(
-          distValue: distValue,
-          onChnagedistValue: (value) {
-            distValue = value;
-          },
-        ),
-        SizedBox(
-          height: 8,
-        ),
-      ],
-    );
-  }
-
-  Widget popularFilter() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding:
-          const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
-          child: Text(
-            AppLocalizations(context).of("popular filter"),
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Colors.grey,
-                fontSize: MediaQuery.of(context).size.width > 360 ? 18 : 16,
-                fontWeight: FontWeight.normal),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 16, left: 16),
-          child: Column(
-            children: getPList(),
-          ),
-        ),
-        SizedBox(
-          height: 8,
-        )
-      ],
-    );
-  }
-
-  List<Widget> getPList() {
-    List<Widget> noList = [];
-    var cout = 0;
-    final columCount = 2;
-    for (var i = 0; i < popularFilterListData.length / columCount; i++) {
-      List<Widget> listUI = [];
-      for (var i = 0; i < columCount; i++) {
-        try {
-          final date = popularFilterListData[cout];
-          listUI.add(
-            Expanded(
-              child: Row(
-                children: <Widget>[
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                      onTap: () {
-                        setState(() {
-                          date.isSelected = !date.isSelected;
-                        });
-                      },
-                      child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: CommonCard(
+                color: AppTheme.backgroundColor,
+                radius: 24,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
                         padding: const EdgeInsets.only(
-                            left: 8.0, top: 8, bottom: 8, right: 0),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(
-                              date.isSelected
-                                  ? Icons.check_box
-                                  : Icons.check_box_outline_blank,
-                              color: date.isSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey.withOpacity(0.6),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            FittedBox(
-                              fit: BoxFit.cover,
-                              child: Text(
-                                AppLocalizations(context).of(date.titleTxt),
-                              ),
-                            ),
-                          ],
+                            left: 16, right: 16, bottom: 16, top: 8
                         ),
-                      ),
+                        child: Center(
+                            child:Text(
+                                isSuccess ?
+                                "Successful payment!" : // L
+                                "Payment failed!"
+                            )
+                        )
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 16, right: 16, bottom: 16, top: 8
+                      ),
+                      child: CommonButton(
+                        buttonText: "Ok",
+                        onTap: () async {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
-          );
-          cout += 1;
-        } catch (e) {
-        }
-      }
-      noList.add(Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: listUI,
-      ));
-    }
-    return noList;
-  }
-
-  Widget priceBarFilter() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            AppLocalizations(context).of("price_text"),
-            textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Colors.grey,
-                fontSize: MediaQuery.of(context).size.width > 360 ? 18 : 16,
-                fontWeight: FontWeight.normal),
           ),
         ),
-        RangeSliderView(
-          values: _values,
-          onChnageRangeValues: (values) {
-            _values = values;
-          },
-        ),
-        SizedBox(
-          height: 8,
-        )
-      ],
-    );
-  }
-*/
+      )
+  );
+}
+Future _getServices() async {
+  UserData userData = UserData();
+  await userData.readJson();
+  var uData = jsonDecode(userData.json);
+
+  String? r = await Requests.services(
+      uData["user_data"]["app_token"],
+      uData["user_data"]["salt"],
+      uData["user_data"]["mail"]
+  );
+  if (r == null)
+    return;
+  var hotelJson = jsonDecode(r)["data"];
+
+  HotelData hotelData = HotelData();
+  await hotelData.readJson();
+  var hData = jsonDecode(hotelData.json);
+
+  hData["services_list"] = hotelJson["services_list"];
+  hData["busyparking"] = hotelJson["busyparking"];
+  hData["dishes_list"] = hotelJson["dishes_list"];
+
+  hotelData.json = jsonEncode(hData);
+  hotelData.saveJson();
+}

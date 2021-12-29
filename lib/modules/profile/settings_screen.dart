@@ -20,9 +20,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> with Helper {
   List<SettingsListData> settingsList = SettingsListData.settingsList;
-  var country = 'Australia';
-  var currency = '\$ AUD';
-  int selectedradioTile = 0;
   List<String> data = ["English", "French", "Arabic", "Japanese"];
 
   @override

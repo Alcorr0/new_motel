@@ -351,17 +351,17 @@
     },
     {
         "text_id": "read_more",
-        "en": "read more",
+        "en": " read more",
         "fr": "Lire la suite",
-        "ar": "اقرأ أكثر",
-        "ja": "続きを読む"
+        "ar": "اقرأ أكثر ",
+        "ja": " 続きを読む"
     },
     {
         "text_id": "less",
-        "en": "less",
-        "fr": "moins",
-        "ar": "أقل",
-        "ja": "もっと少なく"
+        "en": " less",
+        "fr": " moins",
+        "ar": "أقل ",
+        "ja": " もっと少なく"
     },
     {
         "text_id": "Overall_rating",

@@ -11,6 +11,7 @@ import 'package:new_motel/models/requests.dart';
 import 'package:new_motel/routes/route_names.dart';
 import 'package:new_motel/widgets/common_button.dart';
 import 'package:provider/provider.dart';
+import 'package:new_motel/modules/hotel_detailes/room_booking/room_booking_form.dart' show showVerify;
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -118,23 +119,22 @@ class _SplashScreenState extends State<SplashScreen> {
 
                 if (isRegister)
                   CommonButton(
-                    padding:
-                    const EdgeInsets.only(left: 48, right: 48, bottom: 8, top: 32),
+                    padding: const EdgeInsets.only(left: 48, right: 48, bottom: 8, top: 32),
                     buttonText: AppLocalizations(context).of("login"),
                     onTap: () {
                       NavigationServices(context).gotoLoginScreen();
                     },
                   ),
-                CommonButton(
-                  padding:
-                  const EdgeInsets.only(left: 48, right: 48, bottom: 32, top: 8),
-                  buttonText: AppLocalizations(context).of("create_account"),
-                  backgroundColor: AppTheme.backgroundColor,
-                  textColor: AppTheme.primaryTextColor,
-                  onTap: () {
-                    NavigationServices(context).gotoSignScreen();
-                  }
-                )
+                if (!isRegister)
+                  CommonButton(
+                    padding: const EdgeInsets.only(left: 48, right: 48, bottom: 32, top: 8),
+                    buttonText: AppLocalizations(context).of("create_account"),
+                    backgroundColor: AppTheme.backgroundColor,
+                    textColor: AppTheme.primaryTextColor,
+                    onTap: () {
+                      NavigationServices(context).gotoSignScreen();
+                    }
+                  )
               ]
             )
           ]
@@ -158,15 +158,15 @@ class _SplashScreenState extends State<SplashScreen> {
     )
       isRegister = true;
     else
-      return;
+      return false;
 
-    String r = await Requests.autorise(
+    String? r = await Requests.autorise(
         data["user_data"]["app_token"],
         data["user_data"]["salt"],
         data["user_data"]["mail"]
     );
     if (r == null)
-      return;
+      return false;
 
     var userJson = jsonDecode(r)["data"][0]["user_json"];
 
@@ -178,14 +178,41 @@ class _SplashScreenState extends State<SplashScreen> {
 
     userData.json = jsonEncode(data);
     userData.saveJson();
+
+    return true;
   }
   Future _getServices() async {
-
     UserData userData = UserData();
     await userData.readJson();
     var uData = jsonDecode(userData.json);
 
-    String r = await Requests.services(
+    HotelData hotelData = HotelData();
+    await hotelData.readJson();
+    var hData = jsonDecode(hotelData.json);
+
+    if (hData["current_order"]["status"] == "verification") {
+      String? r = await Requests.verify(
+          uData["user_data"]["app_token"],
+          uData["user_data"]["salt"],
+          uData["user_data"]["mail"],
+          hData["current_order"]["id"]
+      );
+      if (r != null) {
+        hData["current_order"]["status"] = "success";
+        hotelData.json = jsonEncode(hData);
+        hotelData.saveJson();
+
+        showVerify(true);
+      } else {
+        hData["current_order"]["status"] = "fail";
+        hotelData.json = jsonEncode(hData);
+        hotelData.saveJson();
+
+        showVerify(false);
+      }
+    }
+
+    String? r = await Requests.services(
         uData["user_data"]["app_token"],
         uData["user_data"]["salt"],
         uData["user_data"]["mail"]
@@ -194,16 +221,11 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     var hotelJson = jsonDecode(r)["data"];
 
-    HotelData hotelData = HotelData();
-    await hotelData.readJson();
-    var hData = jsonDecode(hotelData.json);
-
     hData["services_list"] = hotelJson["services_list"];
     hData["busyparking"] = hotelJson["busyparking"];
     hData["dishes_list"] = hotelJson["dishes_list"];
 
     hotelData.json = jsonEncode(hData);
     hotelData.saveJson();
-
   }
 }

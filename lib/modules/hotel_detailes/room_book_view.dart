@@ -2,20 +2,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:new_motel/constants/text_styles.dart';
 import 'package:new_motel/language/appLocalizations.dart';
-import 'package:new_motel/models/data.dart';
 import 'package:new_motel/modules/hotel_detailes/room_booking/room_booking_form.dart';
 import 'package:new_motel/widgets/common_button.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class RoomeBookView extends StatefulWidget {
-  final Map roomData;
+  final Map data;
   final AnimationController animationController;
   final Animation<double> animation;
 
   const RoomeBookView({
     Key? key,
-    required this.roomData,
+    required this.data,
     required this.animationController,
     required this.animation
   })
@@ -27,10 +25,20 @@ class RoomeBookView extends StatefulWidget {
 
 class _RoomeBookViewState extends State<RoomeBookView> {
   var pageController = PageController(initialPage: 0);
+  var type = Type.book;
 
   @override
   Widget build(BuildContext context) {
     // List<String> images = widget.roomData.imagePath.split(" ");
+
+    if (widget.data["title"] == null) {
+      widget.data["title"] = "Renew booking";
+      type = Type.prolong;
+    } else if (widget.data["id"] == "parking") {
+      type = Type.parking;
+    } else if (widget.data["id"] == "clean") {
+      type = Type.clean;
+    }
 
     return AnimatedBuilder(
       animation: widget.animationController,
@@ -38,156 +46,89 @@ class _RoomeBookViewState extends State<RoomeBookView> {
         return FadeTransition(
           opacity: widget.animation,
           child: new Transform(
-            transform: new Matrix4.translationValues(
-                0.0, 40 * (1.0 - widget.animation.value), 0.0),
+            transform: new Matrix4.translationValues(0.0, 40 * (1.0 - widget.animation.value), 0.0),
             child: Column(
               children: <Widget>[
-                // Stack(
-                //   alignment: Alignment.bottomCenter,
-                //   children: <Widget>[
-                //     AspectRatio(
-                //       aspectRatio: 1.5,
-                //       child: PageView(
-                //         controller: pageController,
-                //         pageSnapping: true,
-                //         scrollDirection: Axis.horizontal,
-                //         children: <Widget>[
-                //
-                //         ],
-                //       ),
-                //     ),
-                //     Padding(
-                //       padding: const EdgeInsets.all(8.0),
-                //       child: SmoothPageIndicator(
-                //         controller: pageController, // PageController
-                //         count: 3,
-                //         effect: WormEffect(
-                //             activeDotColor: Theme.of(context).primaryColor,
-                //             dotColor: Theme.of(context).backgroundColor,
-                //             dotHeight: 10.0,
-                //             dotWidth: 10.0,
-                //             spacing: 5.0), // your preferred effect
-                //         onDotClicked: (index) {},
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                kIsWeb ?
-                  Image.asset(  //заглушка
-                    "assets/images/room_1.jpg",
-                    fit: BoxFit.cover,
-                  )
-                  : CachedNetworkImage(
-                    imageUrl: widget.roomData["foto"],
-                    fit: BoxFit.cover,
-                    progressIndicatorBuilder: (context, url, downloadProgress) =>
-                        Center(
-                          child: SizedBox(
-                            width: 40.0,
-                            height: 40.0,
-                            child: new CircularProgressIndicator(value: downloadProgress.progress),
+                if (widget.data["foto"] != null)
+                  kIsWeb ?
+                    Image.asset(  //заглушка
+                      "assets/images/room_1.jpg",
+                      fit: BoxFit.cover,
+                    )
+                    : CachedNetworkImage(
+                      imageUrl: widget.data["foto"],
+                      fit: BoxFit.cover,
+                      progressIndicatorBuilder: (context, url, downloadProgress) =>
+                          Center(
+                            child: SizedBox(
+                              width: 40.0,
+                              height: 40.0,
+                              child: new CircularProgressIndicator(value: downloadProgress.progress),
+                            ),
                           ),
-                        ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                  ),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    ),
                 Padding(
                   padding: const EdgeInsets.only(
                       left: 16, right: 16, bottom: 16, top: 16),
                   child: Column(
                     children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            widget.roomData["title"],
-                            maxLines: 2,
-                            textAlign: TextAlign.left,
-                            style: TextStyles(context)
-                                .getBoldStyle()
-                                .copyWith(fontSize: 24),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Expanded(child: SizedBox()),
-                          SizedBox(
-                            height: 38,
-                            child: CommonButton(
-                              buttonTextWidget: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, right: 16.0, top: 4, bottom: 4),
-                                child: Text(
-                                  AppLocalizations(context).of("book_now"),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyles(context).getRegularStyle(),
-                                ),
+                      if (type != Type.clean)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                widget.data["title"].substring(widget.data["title"].indexOf(' - ') == -1 ? 0 : widget.data["title"].indexOf(' - ') + 3),
+                                maxLines: 2,
+                                textAlign: TextAlign.left,
+                                style: TextStyles(context)
+                                    .getBoldStyle()
+                                    .copyWith(fontSize: 24),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              onTap: () {
-                                _showPopUp();
-                              },
                             ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            "\$${widget.roomData["sum"]}",
-                            textAlign: TextAlign.left,
-                            style: TextStyles(context)
-                                .getBoldStyle()
-                                .copyWith(fontSize: 22),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 0),
+                          ],
+                        ),
+                      if (type != Type.clean)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              "€${widget.data["sum"]}",
+                              textAlign: TextAlign.left,
+                              style: TextStyles(context).getBoldStyle().copyWith(fontSize: 22)//, fontWeight: FontWeight.bold, fontFamily: "Roboto"),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 0),
+                              child: Text(
+                                (type == Type.parking) ?
+                                  "/per day" :
+                                  "/per night", //L
+                                style: TextStyles(context).getRegularStyle().copyWith(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      SizedBox(
+                        height: 38,
+                        child: CommonButton(
+                          buttonTextWidget: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 16.0, right: 16.0, top: 4, bottom: 4
+                            ),
                             child: Text(
-                              AppLocalizations(context).of("per_night"),
-                              style: TextStyles(context)
-                                  .getRegularStyle()
-                                  .copyWith(fontSize: 14),
+                              (type == Type.clean) ?
+                                widget.data["title"] :
+                                AppLocalizations(context).of("book_now"),
+                              textAlign: TextAlign.center,
+                              style: TextStyles(context).getRegularStyle(),
                             ),
                           ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          // Text(
-                          //   Helper.getPeopleandChildren(
-                          //       widget.roomData.roomData!),
-                          //   // "${widget.roomData.dateTxt}",
-                          //   textAlign: TextAlign.left,
-                          //   style: TextStyles(context).getDescriptionStyle(),
-                          // ),
-                          InkWell(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4.0)),
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 8, right: 4),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  Text(
-                                    AppLocalizations(context)
-                                        .of("more_details"),
-                                    style: TextStyles(context).getBoldStyle(),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    child: Icon(
-                                      Icons.keyboard_arrow_down,
-                                      // color: Theme.of(context).backgroundColor,
-                                      size: 24,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                          onTap: () {
+                            _showPopUp();
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -203,11 +144,17 @@ class _RoomeBookViewState extends State<RoomeBookView> {
     );
   }
 
-  void _showPopUp() {
+  void _showPopUp() {//Navigator.push(context, route).then(onGoBack);
     showDialog(
       context: context,
-      builder: (BuildContext context) => RoomBookingForm(roomData: Item.fromJson(widget.roomData))
+      builder: (BuildContext context) => RoomBookingForm(widget.data, type)//DateTime.parse(widget.roomData["prolong"]
     );
   }
-
+}
+enum Type {
+  book,
+  prolong,
+  parking,
+  business,
+  clean
 }

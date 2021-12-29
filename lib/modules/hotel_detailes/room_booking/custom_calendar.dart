@@ -8,6 +8,7 @@ import 'package:new_motel/motel_app.dart';
 import 'package:provider/provider.dart';
 
 class CustomCalendarView extends StatefulWidget {
+  final bool isStaticStartDate;
   final DateTime minimumDate;
   final DateTime maximumDate;
   final DateTime initialStartDate;
@@ -16,6 +17,7 @@ class CustomCalendarView extends StatefulWidget {
 
   const CustomCalendarView(
       {Key? key,
+      this.isStaticStartDate = false,
       required this.initialStartDate,
       required this.initialEndDate,
       required this.startEndDateChange,
@@ -38,6 +40,7 @@ class _CustomCalendarViewState extends State<CustomCalendarView> {
 
   @override
   void initState() {
+    currentMonthDate = DateTime(widget.initialStartDate.year, widget.initialStartDate.month + 1, 0);
     setListOfDate(currentMonthDate);
     startDate = widget.initialStartDate;
     endDate = widget.initialEndDate;
@@ -79,29 +82,24 @@ class _CustomCalendarViewState extends State<CustomCalendarView> {
               children: <Widget>[
                 _getCircleUi(() {
                   setState(() {
-                    currentMonthDate = DateTime(
-                        currentMonthDate.year, currentMonthDate.month, 0);
+                    currentMonthDate = DateTime(currentMonthDate.year, currentMonthDate.month, 0);
                     setListOfDate(currentMonthDate);
                   });
                 }, Icons.keyboard_arrow_left),
                 Expanded(
                   child: Center(
                     child: Text(
-                      DateFormat("MMMM, yyyy",
-                              _languageType.toString().split(".")[1])
-                          .format(
-                        currentMonthDate,
-                      ),
-                      style: TextStyles(context)
-                          .getRegularStyle()
-                          .copyWith(fontSize: 20),
+                      DateFormat(
+                        "MMMM, yyyy",
+                        _languageType.toString().split(".")[1]
+                      ).format(currentMonthDate),
+                      style: TextStyles(context).getRegularStyle().copyWith(fontSize: 20),
                     ),
                   ),
                 ),
                 _getCircleUi(() {
                   setState(() {
-                    currentMonthDate = DateTime(
-                        currentMonthDate.year, currentMonthDate.month + 2, 0);
+                    currentMonthDate = DateTime(currentMonthDate.year, currentMonthDate.month + 2, 0);
                     setListOfDate(currentMonthDate);
                   });
                 }, Icons.keyboard_arrow_right)
@@ -287,19 +285,20 @@ class _CustomCalendarViewState extends State<CustomCalendarView> {
                       child: InkWell(
                         borderRadius: BorderRadius.all(Radius.circular(32.0)),
                         onTap: () {
-                          if (currentMonthDate.month == date.month) {
-                            var newminimumDate = DateTime(
-                                widget.minimumDate.year,
-                                widget.minimumDate.month,
-                                widget.minimumDate.day - 1);
-                            var newmaximumDate = DateTime(
-                                widget.maximumDate.year,
-                                widget.maximumDate.month,
-                                widget.maximumDate.day + 1);
-                            if (date.isAfter(newminimumDate) &&
-                                date.isBefore(newmaximumDate)) {
-                              onDateClick(date);
-                            }
+                          // if (currentMonthDate.month == date.month) {
+                          var newminimumDate = DateTime(
+                            widget.minimumDate.year,
+                            widget.minimumDate.month,
+                            widget.minimumDate.day - 1
+                          );
+                          var newmaximumDate = DateTime(
+                            widget.maximumDate.year,
+                            widget.maximumDate.month,
+                            widget.maximumDate.day + 1
+                          );
+                          if (date.isAfter(newminimumDate) &&
+                              date.isBefore(newmaximumDate)) {
+                            onDateClick(date);
                           }
                         },
                         child: Padding(
@@ -319,13 +318,12 @@ class _CustomCalendarViewState extends State<CustomCalendarView> {
                               ),
                               boxShadow: getIsItStartAndEndDate(date)
                                   ? <BoxShadow>[
-                                      BoxShadow(
-                                          color:
-                                              Theme.of(context).disabledColor,
-                                          blurRadius: 4,
-                                          offset: Offset(0, 0)),
-                                    ]
-                                  : null,
+                                    BoxShadow(
+                                      color: Theme.of(context).disabledColor,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 0)
+                                    ),
+                                  ] : null,
                             ),
                             child: Center(
                               child: Text(
@@ -442,30 +440,35 @@ class _CustomCalendarViewState extends State<CustomCalendarView> {
   }
 
   void onDateClick(DateTime date) {
-    if (startDate == null) {
-      startDate = date;
-    } else if (startDate != date && endDate == null) {
-      endDate = date;
-    } else if (startDate!.day == date.day && startDate!.month == date.month) {
-      startDate = null;
-    } else if (endDate!.day == date.day && endDate!.month == date.month) {
-      endDate = null;
-    }
-    if (startDate == null && endDate != null) {
-      startDate = endDate;
-      endDate = null;
-    }
-    if (startDate != null && endDate != null) {
-      if (!endDate!.isAfter(startDate!)) {
-        var d = startDate;
-        startDate = endDate;
-        endDate = d;
-      }
-      if (date.isBefore(startDate!)) {
-        startDate = date;
-      }
-      if (date.isAfter(endDate!)) {
+    if (widget.isStaticStartDate) {
+      if (date.isAfter(startDate!))
         endDate = date;
+    } else {
+      if (startDate == null)
+        startDate = date;
+      else if (startDate != date && endDate == null)
+        endDate = date;
+      else if (startDate!.day == date.day && startDate!.month == date.month)
+        startDate = null;
+      else if (endDate!.day == date.day && endDate!.month == date.month)
+        endDate = null;
+
+      if (startDate == null && endDate != null) {
+        startDate = endDate;
+        endDate = null;
+      }
+      if (startDate != null && endDate != null) {
+        if (!endDate!.isAfter(startDate!)) {
+          var d = startDate;
+          startDate = endDate;
+          endDate = d;
+        }
+        if (date.isBefore(startDate!)) {
+          startDate = date;
+        }
+        if (date.isAfter(endDate!)) {
+          endDate = date;
+        }
       }
     }
     setState(() {

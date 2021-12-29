@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       buttonText: AppLocalizations(context).of("login"),
                       onTap: () async {
                         if (_allValidation()) {
-                          String r = await Requests.login(
+                          String? r = await Requests.login(
                               _emailController.text,
                               _passwordController.text
                           );

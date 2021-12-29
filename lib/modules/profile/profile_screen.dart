@@ -109,6 +109,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Radius.circular(32.0),
                                   ),
                                   onTap: () {
+                                    NavigationServices(context).gotoOrdersScreen();
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.align_horizontal_left ,//assignment_outlined
+                                      color: AppTheme.primaryTextColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        //Settings
+                        SizedBox(
+                          height: AppBar().preferredSize.height,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 8, left: 8, right: 8),
+                            child: Container(
+                              width: AppBar().preferredSize.height - 8,
+                              height: AppBar().preferredSize.height - 8,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(32.0),
+                                  ),
+                                  onTap: () {
                                     NavigationServices(context).gotoSettingsScreen();
                                   },
                                   child: Padding(

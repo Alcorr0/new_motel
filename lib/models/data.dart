@@ -43,7 +43,7 @@ class Hotel {
     dist: 2.0,
     reviews: 80,
     rating: 4.4,
-    perNight: 180,
+    perNight: 43,
     roomData: RoomData(1, 2),
     isSelected: true,
     date: DateText(1, 5),
@@ -54,23 +54,20 @@ class UserData {
   String name = "user";
   String json = "";
   String defaultJson = jsonEncode({
-    // "user_data" : {
-    //   "first_name" : "",
-    //   "last_name" : "",
-    //   "mail" : "",
-    //   "phone" : "",
-    //
-    //   "salt" : "",
-    //   "app_token" : ""
-    // },
     "user_data" : {
-      "first_name" : "Alex",
-      "last_name" : "xelA",
-      "mail" : "sashaalex2002@ukr.net",
-      "phone" : "8800853535",
-      "salt" : "61ae2400d199461ae2400d1995",
-      "app_token" : "669a1a10d839a2bf24f7b80642dfa4"
+      "first_name" : "",
+      "last_name"  : "",
+      "mail"       : "", //sashaalex2002@ukr.net
+      "phone"      : "",
+      "salt"       : "", //61ae2400d199461ae2400d1995
+      "app_token"  : ""  //8bb5b2a60c61b1b114506551400352
     },
+
+    // 61ae2400d1992
+    // sashaalex2002@ukr.net
+
+    // 61ca3fe667367
+    // nogibiv879@zherben.com
 
     "visible" : [
       "first_name",
@@ -106,9 +103,13 @@ class HotelData {
   String name = "hotel";
   String json = "";
   String defaultJson = jsonEncode({
-    "services_list" : [], //{"id":"standard|1","sum":43,"title":"43 EUR\/day - Standard, single bedroom"},
+    "services_list" : [],
     "busyparking" : null,
-    "dishes_list" : []    //{"id":"dish-245","title":"Testdish","picture":"https:\/\/maxresdefault.jpg?itok=zUpldgEt","description":"Thesls\r\n"},
+    "dishes_list" : [],
+    "current_order" : {
+      "id" : "",
+      "status" : ""
+    }
   });
 
   Future saveJson() async {
@@ -128,45 +129,6 @@ class HotelData {
     // print(data);
 
     json = data;
-  }
-}
-
-class Item {
-  late String id;
-  late int sum;
-  late String title;
-
-  Item(this.id, this.sum, this.title);
-  Item.empty();
-  Item.fromJsonString(String json)
-  {
-    print(json);
-
-    var data = jsonDecode(json);
-
-    this.id    = data["id"];
-    this.sum   = data["sum"];
-    this.title = data["title"];
-  }
-  Item.fromJson(Map json)
-  {
-    print(json);
-
-    this.id    = json["id"];
-    this.sum   = json["sum"];
-    this.title = json["title"];
-  }
-
-  String toJsonString()
-  {
-    return jsonEncode({
-      "id"     : this.id,
-      "sum"      : this.sum,
-      "title"    : this.title
-    });
-  }
-  static String listToJsonString(List<Item> list) {
-    return jsonEncode([ for (var i in list) i.toJsonString() ]);
   }
 }
 // "services_list":

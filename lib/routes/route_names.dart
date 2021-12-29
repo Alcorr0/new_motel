@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:new_motel/modules/hotel_detailes/dishes_screen.dart';
 import 'package:new_motel/modules/hotel_detailes/hotel_detailes.dart';
 import 'package:new_motel/modules/hotel_detailes/room_booking_screen.dart';
 import 'package:new_motel/modules/login/forgot_password.dart';
 import 'package:new_motel/modules/login/login_screen.dart';
 import 'package:new_motel/modules/login/sign_up_Screen.dart';
+import 'package:new_motel/modules/profile/orders_list.dart';
 import 'package:new_motel/modules/profile/profile_screen.dart';
 import 'package:new_motel/modules/profile/settings_screen.dart';
 import 'package:new_motel/routes/routes.dart';
@@ -43,9 +45,12 @@ class NavigationServices {
     return await _pushMaterialPageRoute(HotelDetailes());
   }
 
-  Future<dynamic> gotoRoomBookingScreen(String hotelname) async {
-    return await _pushMaterialPageRoute(
-        RoomBookingScreen(hotelName: hotelname));
+  Future<dynamic> gotoRoomBookingScreen() async {
+    return await _pushMaterialPageRoute(RoomBookingScreen());
+  }
+
+  Future<dynamic> gotoDishesScreen() async {
+    return await _pushMaterialPageRoute(DishesScreen());
   }
 
   Future<dynamic> gotoProfileScreen() async {
@@ -54,6 +59,10 @@ class NavigationServices {
 
   Future<dynamic> gotoSettingsScreen() async {
     return await _pushMaterialPageRoute(SettingsScreen());
+  }
+
+  Future<dynamic> gotoOrdersScreen() async {
+    return await _pushMaterialPageRoute(OrdersScreen());
   }
 
 //   void gotoHotelDetailesPage(String hotelname) async {

@@ -6,23 +6,20 @@ import 'package:new_motel/models/data.dart';
 import 'package:new_motel/modules/hotel_detailes/room_book_view.dart';
 
 class RoomBookingScreen extends StatefulWidget {
-  final String hotelName;
-
-  const RoomBookingScreen({Key? key, required this.hotelName})
-      : super(key: key);
   @override
   _RoomBookingScreenState createState() => _RoomBookingScreenState();
 }
 
 class _RoomBookingScreenState extends State<RoomBookingScreen> with TickerProviderStateMixin {
-  List<Map> romeList = [];
+  bool isBooking = false;
+  List data = [];
+  var busyparking;
   late AnimationController animationController;
 
   @override
   void initState() {
     super.initState();
-    animationController = AnimationController(
-        duration: Duration(milliseconds: 2000), vsync: this);
+    animationController = AnimationController(duration: Duration(milliseconds: 2000), vsync: this);
     _getRomeList().then((r) {
       setState(() {});
     });
@@ -43,18 +40,23 @@ class _RoomBookingScreenState extends State<RoomBookingScreen> with TickerProvid
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.all(0.0),
-              itemCount: romeList.length,
+              itemCount: data.length,
               itemBuilder: (context, index) {
-                var count = romeList.length > 10 ? 10 : romeList.length;
+                var count = data.length > 10 ? 10 : data.length;
                 var animation = Tween(begin: 0.0, end: 1.0).animate(
-                    CurvedAnimation(
-                        parent: animationController,
-                        curve: Interval((1 / count) * index, 1.0,
-                            curve: Curves.fastOutSlowIn)));
+                  CurvedAnimation(
+                    parent: animationController,
+                    curve: Interval(
+                      (1 / count) * index,
+                      1.0,
+                      curve: Curves.fastOutSlowIn
+                    )
+                  )
+                );
                 animationController.forward();
-                //room book view and room data
+
                 return RoomeBookView(
-                  roomData: romeList[index],
+                  data: data[index],
                   animation: animation,
                   animationController: animationController,
                 );
@@ -94,22 +96,9 @@ class _RoomBookingScreenState extends State<RoomBookingScreen> with TickerProvid
           Expanded(
             child: Center(
               child: Text(
-                widget.hotelName,
+                Hotel.hotel.titleTxt,
                 style: TextStyles(context).getTitleStyle(),
                 overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.all(
-                Radius.circular(32.0),
-              ),
-              onTap: () {},
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(Icons.favorite_border),
               ),
             ),
           ),
@@ -121,10 +110,22 @@ class _RoomBookingScreenState extends State<RoomBookingScreen> with TickerProvid
   Future _getRomeList() async {
     HotelData hotelData = HotelData();
     await hotelData.readJson();
-    var data = jsonDecode(hotelData.json)["services_list"];
+    var dat = jsonDecode(hotelData.json);
 
-    for (int i = 0; i < data.length; i++)
-      if (data[i]["id"].contains("|"))
-        romeList.add(data[i]);
+    busyparking = dat["busyparking"];
+    dat = dat["services_list"];
+
+    List<Map> list = [];
+
+    for (int i = 0; i < dat.length; i++)
+      if (dat[i]["id"].toString().contains("|"))
+        list.add(dat[i]);
+
+    if (list.length == 1) {
+      isBooking = true;
+      data = dat;
+    } else {
+      data = list;
+    }
   }
 }

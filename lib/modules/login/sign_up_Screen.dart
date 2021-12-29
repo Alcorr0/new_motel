@@ -93,22 +93,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         buttonText: AppLocalizations(context).of("sign_up"),
                         onTap: () async {
                           if (_allValidation()) {
-                            String r = await Requests.register(
+                            String? r = await Requests.register(
                                 _fnameController.text,
                                 _lnameController.text,
                                 _emailController.text,
                                 _phoneController.text
                             );
 
-                            if (r == null) {
-                              NavigationServices(context).gotoSplashScreen();
-                              return;
+                            if (r != null) {
+                              saveData(jsonDecode(r));
                             }
 
-                            saveData(jsonDecode(r));
-
-                            NavigationServices(context)
-                                .gotoLoginScreen(); //NavigationServices(context).gotoSplashScreen();
+                            NavigationServices(context).gotoSplashScreen();
                           }
                         }
                       ),
